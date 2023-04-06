@@ -3,11 +3,6 @@
 # Sets up a Windows Server with IIS, Classic ASP and MS Access Support     #
 #                                                                          #
 ############################################################################
-############################################################################
-#                                                                          #
-# Sets up a Windows Server with IIS, Classic ASP and MS Access Support     #
-#                                                                          #
-############################################################################
 
 # FROM mcr.microsoft.com/windows:ltsc2019
 FROM mcr.microsoft.com/windows/servercore/iis
@@ -56,6 +51,20 @@ RUN & c:\windows\system32\inetsrv\appcmd.exe \
       unlock config \
       /section:system.webServer/modules
 
+WORKDIR /
+
+RUN md tools
+
+WORKDIR /tools
+
+COPY /tools .
+
+# RUN msaccess86.exe /quiet
+
 WORKDIR /windows/system32/inetsrv
 
+#RUN Set-ItemProperty 'IIS:\AppPools\DefaultAppPool' -Name "enable32BitAppOnWin64" -Value "True"
+
 RUN & c:\windows\system32\inetsrv\appcmd.exe set config "mywebsite" -section:system.webServer/asp /enableParentPaths:"True" /commit:apphost
+
+RUN Set-WebConfigurationProperty -Filter "/system.webServer/httpErrors" -Name "existingResponse" -Value "PassThrough" -PSPath "IIS:\Sites\mywebsite"
